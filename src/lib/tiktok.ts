@@ -9,7 +9,7 @@ const TIKTOK_URL_REGEX =
 
 export function extractTikTokUrl(rawInput: string): string | null {
   const match = rawInput.match(TIKTOK_URL_REGEX);
-  return match ? match[0].trim() : null;
+  return match ? match[0].replace(/[,.;:!?)]+$/, "").trim() : null;
 }
 
 /** Interface chuẩn hoá kết quả từ mọi provider */
