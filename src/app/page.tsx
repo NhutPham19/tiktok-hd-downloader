@@ -379,31 +379,13 @@ function SkeletonCard() {
             marginTop: "0.5rem",
           }}
         />
-        <div style={{ display: "flex", gap: "0.5rem" }}>
-          <div
-            style={{
-              height: 32,
-              background: "#f1f5f9",
-              borderRadius: 8,
-              flex: 1,
-            }}
-          />
-          <div
-            style={{
-              height: 32,
-              background: "#f1f5f9",
-              borderRadius: 8,
-              flex: 1,
-            }}
-          />
-        </div>
       </div>
       <style>{`@keyframes shimmer { to { background-position: -200% 0; } }`}</style>
     </div>
   );
 }
 
-/** Card kết quả video */
+/** Card kết quả video — Tối giản theo yêu cầu người dùng */
 function VideoResultCard({
   data,
   onReset,
@@ -415,6 +397,9 @@ function VideoResultCard({
   const isSlideshow = data.type === "slideshow";
   const [downloadingType, setDownloadingType] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+
+  // Chọn link video sắc nét nhất (ưu tiên hdplay, fallback sang play)
+  const bestVideoUrl = data.hdplay || data.play;
 
   const handleDownload = async (
     fileUrl: string,
@@ -476,7 +461,7 @@ function VideoResultCard({
             </div>
             <button
               onClick={onReset}
-              title="Tải video khác"
+              title="Làm mới"
               style={{
                 padding: "0.375rem",
                 borderRadius: "0.5rem",
@@ -606,32 +591,9 @@ function VideoResultCard({
               </button>
             )}
           </div>
-
-          {/* Nút reset */}
-          <button
-            onClick={onReset}
-            style={{
-              width: "100%",
-              marginTop: "0.875rem",
-              padding: "0.625rem",
-              background: "#f8fafc",
-              border: "1px solid #e2e8f0",
-              borderRadius: "0.5rem",
-              fontSize: "0.8125rem",
-              fontWeight: 600,
-              color: "#475569",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.375rem",
-            }}
-          >
-            <RefreshCw size={14} /> Tải thêm video khác
-          </button>
         </div>
       ) : (
-        // ── Video thường ──────────────────────────────────────────────
+        // ── Video thường (Tối giản 100%) ──────────────────────────────
         <div
           style={{
             background: "#fff",
@@ -641,7 +603,7 @@ function VideoResultCard({
             padding: "1.25rem",
             display: "flex",
             flexDirection: "column",
-            gap: "1rem",
+            gap: "0.875rem",
           }}
         >
           <div
@@ -651,7 +613,7 @@ function VideoResultCard({
               alignItems: "flex-start",
             }}
           >
-            {/* Ảnh bìa */}
+            {/* Ảnh bìa — Chạm vào để phát xem trước trực tiếp */}
             <div
               style={{
                 position: "relative",
@@ -719,7 +681,7 @@ function VideoResultCard({
               </div>
             </div>
 
-            {/* Thông tin + nút */}
+            {/* Thông tin tác giả & Nút hành động chính */}
             <div style={{ flex: 1, minWidth: 0 }}>
               <div
                 style={{
@@ -727,13 +689,13 @@ function VideoResultCard({
                   justifyContent: "space-between",
                   alignItems: "flex-start",
                   gap: "0.5rem",
-                  marginBottom: "0.5rem",
+                  marginBottom: "0.625rem",
                 }}
               >
                 <div style={{ minWidth: 0 }}>
                   <p
                     style={{
-                      fontSize: "0.8125rem",
+                      fontSize: "0.875rem",
                       fontWeight: 600,
                       color: "#0f172a",
                       marginBottom: "0.125rem",
@@ -756,7 +718,7 @@ function VideoResultCard({
                 </div>
                 <button
                   onClick={onReset}
-                  title="Tải video khác"
+                  title="Làm mới"
                   style={{
                     flexShrink: 0,
                     padding: "0.375rem",
@@ -769,16 +731,16 @@ function VideoResultCard({
                     alignItems: "center",
                   }}
                 >
-                  <RefreshCw size={16} />
+                  <RefreshCw size={15} />
                 </button>
               </div>
 
-              {/* Nút HD — Smart Download: iPhone mở sheet Lưu video, PC lưu Downloads */}
-              {data.hdplay && (
+              {/* DUY NHẤT 1 NÚT TẢI VIDEO HD (Rõ nhất, không logo) */}
+              {bestVideoUrl && (
                 <button
                   onClick={() =>
                     handleDownload(
-                      data.hdplay!,
+                      bestVideoUrl,
                       `tiktok-hd-${videoId}.mp4`,
                       "mp4",
                       "hd"
@@ -829,7 +791,7 @@ function VideoResultCard({
                 </button>
               )}
 
-              {/* Gợi ý cho iPhone */}
+              {/* Hướng dẫn ngắn gọn, dễ hiểu */}
               <div
                 style={{
                   fontSize: "0.75rem",
@@ -837,120 +799,55 @@ function VideoResultCard({
                   background: "#f8fafc",
                   padding: "0.375rem 0.625rem",
                   borderRadius: "0.375rem",
-                  marginBottom: "0.5rem",
+                  marginBottom: data.music ? "0.5rem" : 0,
                   border: "1px solid #f1f5f9",
                   lineHeight: 1.4,
                 }}
               >
-                💡 <strong>iPhone:</strong> Bấm tải ➔ Bảng mở ra chọn{" "}
-                <strong>&quot;Lưu video&quot;</strong> để lưu thẳng vào Album
-                Ảnh.
+                💡 Bấm <strong>Tải video</strong> ➔ Chọn{" "}
+                <strong>&quot;Lưu video&quot;</strong>
               </div>
 
-              {/* Nút phụ */}
-              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-                {data.play && (
-                  <button
-                    onClick={() =>
-                      handleDownload(
-                        data.play!,
-                        `tiktok-${videoId}.mp4`,
-                        "mp4",
-                        "sd"
-                      )
-                    }
-                    disabled={downloadingType === "sd"}
-                    style={{
-                      flex: 1,
-                      minWidth: 95,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "0.375rem",
-                      padding: "0.5rem 0.625rem",
-                      border: "1px solid #e2e8f0",
-                      color: "#0f172a",
-                      background: "#fff",
-                      borderRadius: "0.5rem",
-                      fontSize: "0.8125rem",
-                      fontWeight: 500,
-                      cursor: downloadingType === "sd" ? "wait" : "pointer",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {downloadingType === "sd" ? (
-                      <Loader2 size={14} className="animate-spin" />
-                    ) : (
-                      <Download size={14} />
-                    )}
-                    MP4 Thường
-                  </button>
-                )}
-                {data.music && (
-                  <button
-                    onClick={() =>
-                      handleDownload(
-                        data.music!,
-                        `tiktok-music-${videoId}.mp3`,
-                        "mp3",
-                        "music"
-                      )
-                    }
-                    disabled={downloadingType === "music"}
-                    style={{
-                      flex: 1,
-                      minWidth: 95,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "0.375rem",
-                      padding: "0.5rem 0.625rem",
-                      border: "1px solid #e2e8f0",
-                      color: "#0f172a",
-                      background: "#fff",
-                      borderRadius: "0.5rem",
-                      fontSize: "0.8125rem",
-                      fontWeight: 500,
-                      cursor: downloadingType === "music" ? "wait" : "pointer",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {downloadingType === "music" ? (
-                      <Loader2 size={14} className="animate-spin" />
-                    ) : (
-                      <Music size={14} />
-                    )}
-                    Nhạc MP3
-                  </button>
-                )}
+              {/* Nút Nhạc MP3 (giữ lại) */}
+              {data.music && (
                 <button
-                  onClick={() => setShowPreview(!showPreview)}
+                  onClick={() =>
+                    handleDownload(
+                      data.music!,
+                      `tiktok-music-${videoId}.mp3`,
+                      "mp3",
+                      "music"
+                    )
+                  }
+                  disabled={downloadingType === "music"}
                   style={{
-                    flex: 1,
-                    minWidth: 95,
+                    width: "100%",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     gap: "0.375rem",
-                    padding: "0.5rem 0.625rem",
+                    padding: "0.5rem 0.75rem",
                     border: "1px solid #e2e8f0",
                     color: "#0f172a",
-                    background: showPreview ? "#f1f5f9" : "#fff",
+                    background: "#fff",
                     borderRadius: "0.5rem",
                     fontSize: "0.8125rem",
                     fontWeight: 500,
-                    cursor: "pointer",
-                    whiteSpace: "nowrap",
+                    cursor: downloadingType === "music" ? "wait" : "pointer",
                   }}
                 >
-                  <Play size={14} />
-                  {showPreview ? "Đóng xem" : "Xem trước"}
+                  {downloadingType === "music" ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <Music size={14} />
+                  )}
+                  Tải Nhạc MP3
                 </button>
-              </div>
+              )}
             </div>
           </div>
 
-          {/* Trình phát xem trước video ngay trên trang */}
+          {/* Trình phát xem trước video (khi chạm vào video nhỏ bên trái) */}
           {showPreview && (
             <div
               style={{
@@ -961,7 +858,7 @@ function VideoResultCard({
               }}
             >
               <video
-                src={data.hdplay || data.play}
+                src={bestVideoUrl}
                 controls
                 playsInline
                 autoPlay
@@ -973,31 +870,6 @@ function VideoResultCard({
               />
             </div>
           )}
-
-          {/* Nút Tải thêm video khác to rõ ràng */}
-          <button
-            onClick={onReset}
-            style={{
-              width: "100%",
-              padding: "0.625rem",
-              background: "#f8fafc",
-              border: "1px solid #e2e8f0",
-              borderRadius: "0.5rem",
-              fontSize: "0.8125rem",
-              fontWeight: 600,
-              color: "#334155",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.375rem",
-              transition: "background 150ms",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#f1f5f9")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "#f8fafc")}
-          >
-            <RefreshCw size={14} /> Tải thêm video khác
-          </button>
         </div>
       )}
     </div>
@@ -1217,7 +1089,7 @@ export default function Home() {
             padding: "1rem",
             display: "flex",
             flexDirection: "column",
-            gap: "0.625rem",
+            gap: "0.75rem",
           }}
         >
           <div
@@ -1266,7 +1138,7 @@ export default function Home() {
                 onBlur={(e) => (e.target.style.borderColor = "#e2e8f0")}
               />
 
-              {/* Nút Xóa nhanh bên trong input khi có ký tự */}
+              {/* Nút Xóa nhanh bên trong input */}
               {inputVal && (
                 <button
                   type="button"
@@ -1301,12 +1173,12 @@ export default function Home() {
               )}
             </div>
 
-            {/* Nút Xóa tất cả ngoài thanh (hiện khi có link) */}
+            {/* Nút Xóa tất cả ngoài thanh (khi có link) */}
             {inputVal && (
               <button
                 type="button"
                 onClick={handleClear}
-                title="Xóa nhanh tất cả link đã nhập"
+                title="Xóa nhanh link đã nhập"
                 style={{
                   height: 52,
                   padding: "0 0.875rem",
@@ -1354,25 +1226,31 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Nút Lấy Video */}
+          {/* NÚT LẤY VIDEO — Nổi bật, sang trọng, tương phản cao */}
           <button
             onClick={() => runParse(inputVal)}
             disabled={uiState === "loading" || !inputVal.trim()}
             style={{
               width: "100%",
-              height: 48,
-              background: inputVal.trim() ? "#0f172a" : "#94a3b8",
+              height: 50,
+              background: inputVal.trim()
+                ? "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)"
+                : "#cbd5e1",
               color: "#fff",
               borderRadius: "0.75rem",
               border: "none",
-              fontSize: "0.9375rem",
+              fontSize: "1rem",
               fontWeight: 700,
+              letterSpacing: "-0.01em",
               cursor: inputVal.trim() ? "pointer" : "not-allowed",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               gap: "0.5rem",
-              transition: "background 150ms, transform 100ms",
+              boxShadow: inputVal.trim()
+                ? "0 4px 14px rgba(37, 99, 235, 0.35)"
+                : "none",
+              transition: "all 150ms ease",
             }}
             onMouseDown={(e) => {
               if (inputVal.trim())
@@ -1386,7 +1264,7 @@ export default function Home() {
               </>
             ) : (
               <>
-                <Download size={18} /> Lấy Video
+                <Download size={18} strokeWidth={2.5} /> Lấy Video
               </>
             )}
           </button>
